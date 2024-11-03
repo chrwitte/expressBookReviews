@@ -16,56 +16,118 @@ public_users.post("/register", (req, res) => {
   return res.status(200).json({ message: "User registered successfully" });
 });
 
-// Get the book list available in the shop
+// Function to fetch books
+function fetchBooks() {
+  return new Promise((resolve, reject) => {
+    if (books) {
+      resolve(books);
+    } else {
+      reject("Error fetching books");
+    }
+  });
+}
+
+// Get the book list available in the shop using Promise callbacks
 public_users.get("/", function (req, res) {
-  return res.status(200).json(books);
+  fetchBooks()
+    .then((fetchedBooks) => {
+      res.status(200).json(fetchedBooks);
+    })
+    .catch((err) => {
+      res.status(500).json({ message: err });
+    });
 });
 
-// Get book details based on ISBN
+// Function to fetch book by ISBN
+function fetchBookByISBN(isbn) {
+  return new Promise((resolve, reject) => {
+    const book = books[isbn];
+    if (book) {
+      resolve(book);
+    } else {
+      reject("Book not found");
+    }
+  });
+}
+
+// Get book details based on ISBN using Promise callbacks
 public_users.get("/isbn/:isbn", function (req, res) {
-  const isbn = req.params.isbn;
-  const book = books[isbn];
-
-  if (book) {
-    return res.status(200).json(book);
-  } else {
-    return res.status(404).json({ message: "Book not found" });
-  }
+  fetchBookByISBN(req.params.isbn)
+    .then((book) => {
+      res.status(200).json(book);
+    })
+    .catch((err) => {
+      res.status(404).json({ message: err });
+    });
 });
 
-// Get book details based on author
+// Function to fetch book by author
+function fetchBookByAuthor(author) {
+  return new Promise((resolve, reject) => {
+    const book = Object.values(books).find((book) => book.author === author);
+    if (book) {
+      resolve(book);
+    } else {
+      reject("Book not found");
+    }
+  });
+}
+
+// Get book details based on author using Promise callbacks
 public_users.get("/author/:author", function (req, res) {
-  const author = req.params.author;
-  const book = Object.values(books).find((book) => book.author === author);
-
-  if (book) {
-    return res.status(200).json(book);
-  } else {
-    return res.status(404).json({ message: "Book not found" });
-  }
+  fetchBookByAuthor(req.params.author)
+    .then((book) => {
+      res.status(200).json(book);
+    })
+    .catch((err) => {
+      res.status(404).json({ message: err });
+    });
 });
 
-// Get all books based on title
+// Function to fetch book by title
+function fetchBookByTitle(title) {
+  return new Promise((resolve, reject) => {
+    const book = Object.values(books).find((book) => book.title === title);
+    if (book) {
+      resolve(book);
+    } else {
+      reject("Book not found");
+    }
+  });
+}
+
+// Get all books based on title using Promise callbacks
 public_users.get("/title/:title", function (req, res) {
-  const title = req.params.title;
-  const book = Object.values(books).find((book) => book.title === title);
-
-  if (book) {
-    return res.status(200).json(book);
-  } else {
-    return res.status(404).json({ message: "Book not found" });
-  }
+  fetchBookByTitle(req.params.title)
+    .then((book) => {
+      res.status(200).json(book);
+    })
+    .catch((err) => {
+      res.status(404).json({ message: err });
+    });
 });
 
-//  Get book review
+// Function to fetch book reviews
+function fetchBookReviews(isbn) {
+  return new Promise((resolve, reject) => {
+    const book = books[isbn];
+    if (book) {
+      resolve(book.reviews);
+    } else {
+      reject("Book not found");
+    }
+  });
+}
+
+// Get book reviews using Promise callbacks
 public_users.get("/review/:isbn", function (req, res) {
-  const isbn = req.params.isbn;
-  const book = books[isbn];
-  if (book) {
-    return res.status(200).json(book.reviews);
-  } else {
-    return res.status(404).json({ message: "Book not found" });
-  }
+  fetchBookReviews(req.params.isbn)
+    .then((reviews) => {
+      res.status(200).json(reviews);
+    })
+    .catch((err) => {
+      res.status(404).json({ message: err });
+    });
 });
 
 module.exports.general = public_users;
